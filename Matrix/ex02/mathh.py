@@ -2,7 +2,7 @@
 
 class Matrix:
 	def __init__(self, input=None):
-		print("here", type(input), input)
+		# print("here", type(input), input)
 		if isinstance(input,list) :
 			if not all(isinstance(row, list) for row in input):
 				raise ValueError("Input must be a either a list of lists or a tuple for the shape2")

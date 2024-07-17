@@ -2,7 +2,7 @@
 
 class Matrix:
 	def __init__(self, input=None):
-		print("here", type(input), input)
+		# print("here", type(input), input)
 		if isinstance(input,list) :
 			if not all(isinstance(row, list) for row in input):
 				raise ValueError("Input must be a either a list of lists or a tuple for the shape2")
@@ -141,6 +141,18 @@ class Matrix:
 
 	def __repr__(self):
 		return f"Matrix({self._data})"
+	
+	def dot(self, v):
+		if type(self) != Vector or type(v) != Vector :
+			raise ValueError("Must be vector")
+		if self.shape != v.shape:
+			raise ValueError("Not the same shape")
+		size = self.shape
+		result = 0
+		for i in range(size[0]):
+			for j in range(size[1]):
+					result += self.data[i][j] * v.data[i][j]
+		return result
 
 
 class Vector(Matrix):

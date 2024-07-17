@@ -8,7 +8,9 @@ def main():
 		m1 = Matrix([[1, 2]])
 		m2 = Matrix([[-1, 0], [-2, 5]])
 		v1 = Vector([[1, 2]])
-		v2 = Vector([[-1, 8], [8]])
+		# import pdb; pdb.set_trace()
+		v2 = Vector([[-1, 8]])
+		
 		# v3 = Vector([[-1, 0], [-2, 5]])
 		# print(str(m))
 		# m2 = Matrix([[-1.0, -2.0], [-3.0, -4.0]])
@@ -26,7 +28,7 @@ def main():
 		# print(result)
 
 
-		result = v1 * v2
+		result = 2 - v1
 		# print(result)
 		# result = v1 + v2
 		# print(result)
@@ -40,5 +42,7 @@ def main():
 
 	except ValueError as e :
 		print(e)
+
+		
 if __name__ == "__main__":
 	main()
