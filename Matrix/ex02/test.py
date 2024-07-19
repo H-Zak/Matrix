@@ -1,4 +1,4 @@
-from mathh import Matrix, Vector
+from ex07.mathh import Matrix, Vector
 
 def linear_interpolation(u, v, coefs):
 	if v.shape != u.shape or not isinstance(coefs, (int, float)):

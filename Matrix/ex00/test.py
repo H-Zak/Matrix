@@ -1,4 +1,4 @@
-from mathh import Matrix, Vector
+from ex07.mathh import Matrix, Vector
 
 
 # faire tous les tests avec des tuples plutot que des lists

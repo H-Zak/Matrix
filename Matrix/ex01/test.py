@@ -1,4 +1,4 @@
-from mathh import Matrix, Vector
+from ex07.mathh import Matrix, Vector
 
 def linear_combination(u, coefs):
 	# print(u[0].shape)
