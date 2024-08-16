@@ -237,12 +237,46 @@ class Matrix:
 		max_val = abs(self.data[row][col])
 		max_row_index = row
 		for i in range(row, self.shape[0]):
-
 			if abs(self.data[i][col]) > max_val:
 				max_val = abs(self.data[i][col])
 				max_row_index = i
 		if max_row_index != row:
 			self.data[row], self.data[max_row_index] = self.data[max_row_index], self.data[row]
+	
+	def determinant_3(self):
+		a, b, c = self.data[0]
+		d, e, f = self.data[1]
+		g, h, i = self.data[2]
+		return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g)
+	
+	def minor(self, i, j):
+		"""Return the minor matrix after removing row i and column j"""
+		return [row[:j] + row[j+1:] for row in (self.data[:i] + self.data[i+1:])]
+	
+	def determinant_4(self):
+		det = 0
+		for col in range(4):
+			minor_matrix = Matrix(self.minor(0, col))
+			cofactor = ((-1) ** col) * self.data[0][col] * minor_matrix.determinant_3()
+			det += cofactor
+		return det
+	
+	def determinant(self):
+		if not isinstance(self, (Vector, Matrix)) or self.is_empty():
+			raise ValueError("it must be a vector or Matrix and not empty")
+		if self.shape[0] != self.shape[1] or self.shape[0] < 2 or self.shape[0] > 4:
+			raise ValueError("matrice must be a square, minimum dimension of 2 and max 4 ")
+		if self.shape[0] == 2:
+			return self.data[0][0] * self.data[1][1] - self.data[0][1] * self.data[1][0]
+		elif self.shape[0] == 3 :
+			return self.determinant_3()
+		else :
+			return self.determinant_4()
+
+		
+
+
+
 	
 
 

@@ -109,7 +109,7 @@ class Matrix:
 				print(self._shape[1], other.shape[0])
 				raise ValueError("number of Matrix1 line should be equal to columm of matrix 2 ()")
 			create = [[sum(a * b for a, b in zip(row, col)) for col in zip(*other._data)] for row in self._data]
-		elif isinstance(other, (float, int)):
+		elif isinstance(other, (float, int, Matrix, Vector)):
 			create = [[other * self._data[i][j] for j in range(len(self._data[i]))] for i in range(len(self._data))]
 		else:
 			raise ValueError("Must be multiple by a int or a float or a Matrix or a Vector")
@@ -126,7 +126,7 @@ class Matrix:
 			if other.shape[1] != self._shape[0] :
 				raise ValueError("number of Matrix1 line should be equal to columm of matrix 2")
 			create = [[sum(a * b for a, b in zip(row, col)) for col in zip(*self._data)] for row in other._data]
-		elif isinstance(other, (float, int)):
+		elif isinstance(other, (float, int, Matrix, Vector)):
 			create = [[other * self._data[i][j] for j in range(len(self._data[i]))] for i in range(len(self._data))]
 		else:
 			raise ValueError("Must be multiple by a int or a float or a Matrix or a Vector")
@@ -199,9 +199,10 @@ class Matrix:
 			print(self.data)
 			
 			self.swap_max_first_row(i, col)
-			if self.data[i][col] == 0:
-
+			while col < self.shape[1] and self.data[i][col] == 0:
 				col += 1
+			if col >= self.shape[1]:
+				continue
 
 			self.data[i] = [x / self.data[i][col]  for x in self.data[i]]
 			for j in range (i + 1, self.shape[0]):
@@ -222,13 +223,92 @@ class Matrix:
 							self.data[row] = [current_row - factor * self.data[i][k] for k,current_row in enumerate(self.data[row])]
 
 
+	def identity_matrix(self):
+			if not isinstance(self, Matrix) or self.is_empty():
+				raise ValueError("it must be a Matrix and not empty")
+			
+			rows, cols = self.shape
+			if rows != cols:
+				raise ValueError("Identity matrix can only be created for square matrices")
+			
+			identity = [[1 if i == j else 0 for j in range(cols)] for i in range(rows)]
+			return identity
+	
+	def round_floatt(value, decimals=6):
+		return round(value, decimals)
+	
+	def real_inverse(self):
+
+		if not isinstance(self, (Vector, Matrix)) or self.is_empty():
+			raise ValueError("it must be a vector or Matrix and not empty")
+		if self.shape[0] == 1 or self.shape[1] == 1:
+			return self
+		identity = self.identity_matrix()
+
+		col = 0
+		for i in range(self.shape[0]):
+
+			self.swap_max_first_row_inverse(i, col, identity)
+			while col < self.shape[1] and self.data[i][col] == 0:
+				col += 1
+			if col >= self.shape[1]:
+				continue
+			divisor = self.data[i][col]
+			if divisor == 0:
+				raise ValueError("Division by zero detected")
+			self.data[i] = [x / divisor  for x in self.data[i]]
+			identity[i] = [x / divisor  for x in identity[i]]
+			print(f"Step {i} - After division:")
+			print("Matrix:", self.data)
+			print("Identity:", identity)
+			for j in range (i + 1, self.shape[0]):
+				if (j < self.shape[0]):
+					factor = self.data[j][col]
+					self.data[j] = [round(current_row - factor * self.data[i][k], 6) if k >= col else current_row for k, current_row in enumerate(self.data[j])]
+					identity[j] = [round(current_row - factor * identity[i][k], 6)   if k >= col else current_row for k, current_row in enumerate(identity[j])]
+		
+		print(f"Step {i} - After elimination:")
+		print("Matrix:", self.data)
+		print("Identity:", identity)
+
+		for i in range(self.shape[0] - 1,-1, -1):
+			# print("self 2 \n", self.data)
+			# print("identity 2",identity)
+			for j in range(self.shape[1]):
+				if self.data[i][j] == 1:
+					for row in range(i - 1, -1 ,-1):
+						if self.data[row][j] != 0:
+							factor = self.data[row][j]
+							factor2 = identity[row][j] 
+							self.data[row] = [round(current_row - factor * self.data[i][k], 6) for k,current_row in enumerate(self.data[row])]
+							identity[row] = [round(current_row - factor * identity[i][k], 6)for k,current_row in enumerate(identity[row])]
+		# print("self 3 ", self.data)
+		# print("identity 3",identity)
+		print(f"Step {i} - After back substitution:")
+		print("Matrix:", self.data)
+		print("Identity:", identity)
+		return identity
+
+
+
 	
 	def reduced(self):
 		for i in range(min(self.shape[0], self.shape[1]-1, -1, -1 )):
 			pivot= self.data[i][i]
 			
 
-
+	def swap_max_first_row_inverse(self, row, col, identity):
+		if row >= self.shape[0] or col >= self.shape[1]:
+				return  
+		max_val = abs(self.data[row][col])
+		max_row_index = row
+		for i in range(row, self.shape[0]):
+			if abs(self.data[i][col]) > max_val:
+				max_val = abs(self.data[i][col])
+				max_row_index = i
+		if max_row_index != row:
+			self.data[row], self.data[max_row_index] = self.data[max_row_index], self.data[row]
+			identity[row], identity[max_row_index] = identity[max_row_index], identity[row]
 
 
 	def swap_max_first_row(self, row, col):
@@ -237,12 +317,46 @@ class Matrix:
 		max_val = abs(self.data[row][col])
 		max_row_index = row
 		for i in range(row, self.shape[0]):
-
 			if abs(self.data[i][col]) > max_val:
 				max_val = abs(self.data[i][col])
 				max_row_index = i
 		if max_row_index != row:
 			self.data[row], self.data[max_row_index] = self.data[max_row_index], self.data[row]
+	
+	def determinant_3(self):
+		a, b, c = self.data[0]
+		d, e, f = self.data[1]
+		g, h, i = self.data[2]
+		return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g)
+	
+	def minor(self, i, j):
+		"""Return the minor matrix after removing row i and column j"""
+		return [row[:j] + row[j+1:] for row in (self.data[:i] + self.data[i+1:])]
+	
+	def determinant_4(self):
+		det = 0
+		for col in range(4):
+			minor_matrix = Matrix(self.minor(0, col))
+			cofactor = ((-1) ** col) * self.data[0][col] * minor_matrix.determinant_3()
+			det += cofactor
+		return det
+	
+	def determinant(self):
+		if not isinstance(self, (Vector, Matrix)) or self.is_empty():
+			raise ValueError("it must be a vector or Matrix and not empty")
+		if self.shape[0] != self.shape[1] or self.shape[0] < 2 or self.shape[0] > 4:
+			raise ValueError("matrice must be a square, minimum dimension of 2 and max 4 ")
+		if self.shape[0] == 2:
+			return self.data[0][0] * self.data[1][1] - self.data[0][1] * self.data[1][0]
+		elif self.shape[0] == 3 :
+			return self.determinant_3()
+		else :
+			return self.determinant_4()
+
+		
+
+
+
 	
 
 
