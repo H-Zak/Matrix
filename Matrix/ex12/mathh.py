@@ -253,23 +253,27 @@ class Matrix:
 				col += 1
 			if col >= self.shape[1]:
 				continue
-			divisor = self.data[i][col]
-			if divisor == 0:
-				raise ValueError("Division by zero detected")
-			self.data[i] = [x / divisor  for x in self.data[i]]
-			identity[i] = [x / divisor  for x in identity[i]]
-			print(f"Step {i} - After division:")
-			print("Matrix:", self.data)
-			print("Identity:", identity)
+			new_i = i
+			while (new_i < self.shape[0]):
+				divisor = self.data[new_i][col]
+				divisor_2 = identity[new_i]
+				if divisor != 0:
+					self.data[new_i] = [x / divisor  for x in self.data[new_i]]
+					identity[new_i] = [x / divisor  for x in identity[new_i]]
+					# raise ValueError("Division by zero detected")
+				new_i += 1
+			# print(f"Step {i} - After division:")
+			# print("Matrix:", self.data)
+			# print("Identity:", identity)
 			for j in range (i + 1, self.shape[0]):
 				if (j < self.shape[0]):
 					factor = self.data[j][col]
-					self.data[j] = [round(current_row - factor * self.data[i][k], 6) if k >= col else current_row for k, current_row in enumerate(self.data[j])]
-					identity[j] = [round(current_row - factor * identity[i][k], 6)   if k >= col else current_row for k, current_row in enumerate(identity[j])]
+					self.data[j] = [round(current_row - factor * self.data[i][k], 6) for k, current_row in enumerate(self.data[j])]
+					identity[j] = [round(current_row - factor * identity[i][k], 6)   for k, current_row in enumerate(identity[j])]
 		
-		print(f"Step {i} - After elimination:")
-		print("Matrix:", self.data)
-		print("Identity:", identity)
+		# print(f"Step {i} - After elimination:")
+		# print("Matrix:", self.data)
+		# print("Identity:", identity)
 
 		for i in range(self.shape[0] - 1,-1, -1):
 			# print("self 2 \n", self.data)
@@ -284,9 +288,9 @@ class Matrix:
 							identity[row] = [round(current_row - factor * identity[i][k], 6)for k,current_row in enumerate(identity[row])]
 		# print("self 3 ", self.data)
 		# print("identity 3",identity)
-		print(f"Step {i} - After back substitution:")
-		print("Matrix:", self.data)
-		print("Identity:", identity)
+		# print(f"Step {i} - After back substitution:")
+		# print("Matrix:", self.data)
+		# print("Identity:", identity)
 		return identity
 
 
