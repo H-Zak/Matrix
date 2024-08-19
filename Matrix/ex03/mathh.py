@@ -1,8 +1,7 @@
-# je ne gere pas le cas ou 2 vector multiplie entre eux renvoie un Vector et non pas une matrix
+
 
 class Matrix:
 	def __init__(self, input=None):
-		# print("here", type(input), input)
 		if isinstance(input,list) :
 			if not all(isinstance(row, list) for row in input):
 				raise ValueError("Input must be a either a list of lists or a tuple for the shape2")
@@ -23,7 +22,6 @@ class Matrix:
 			self._shape = (len(input), len(input[0]) if input else 0)
 		else:
 			raise ValueError("Input must be a either a list of lists or a tuple for the shape3")
-		# print(self._data)
 
 	@property
 	def data(self):

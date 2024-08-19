@@ -1,8 +1,6 @@
-# je ne gere pas le cas ou 2 vector multiplie entre eux renvoie un Vector et non pas une matrix
 import math
 class Matrix:
 	def __init__(self, input=None):
-		# print("here", type(input), input)
 		if isinstance(input,list) :
 			if not all(isinstance(row, list) for row in input):
 				raise ValueError("Input must be a either a list of lists or a tuple for the shape2")
@@ -23,7 +21,6 @@ class Matrix:
 			self._shape = (len(input), len(input[0]) if input else 0)
 		else:
 			raise ValueError("Input must be a either a list of lists or a tuple for the shape3")
-		# print(self._data)
 
 	@property
 	def data(self):
@@ -160,14 +157,14 @@ class Matrix:
 		else:
 			raise ValueError("Must be a vector")
 
-	def norm_2(self):
+	def norm(self):
 		if isinstance(self, Vector):
 			return math.sqrt(sum(pow(x , 2) for sublist in self.data for x in sublist))
 		else:
 			raise ValueError("Must be a Vector")
 
 	
-	def normal_inf(self):
+	def norm_inf(self):
 		if (isinstance(self, Vector)):
 			return max(abs(x) for sublist in self.data for x in sublist)
 		else:

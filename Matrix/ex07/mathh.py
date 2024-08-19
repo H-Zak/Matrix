@@ -1,8 +1,6 @@
-# je ne gere pas le cas ou 2 vector multiplie entre eux renvoie un Vector et non pas une matrix
 import math
 class Matrix:
 	def __init__(self, input=None):
-		# print("here", type(input), input)
 		if isinstance(input,list) :
 			if not all(isinstance(row, list) for row in input):
 				raise ValueError("Input must be a either a list of lists or a tuple for the shape2")
@@ -23,8 +21,7 @@ class Matrix:
 			self._shape = (len(input), len(input[0]) if input else 0)
 		else:
 			raise ValueError("Input must be a either a list of lists or a tuple for the shape3")
-		# print(self._data)
-
+	
 	@property
 	def data(self):
 		return self._data
@@ -116,6 +113,30 @@ class Matrix:
 		print("mul : ", create)
 		return Matrix(create)
 	
+	def mul_mat(self, other):
+		if isinstance(other, Vector):
+			# Multiplication matrice par vecteur
+			if self._shape[1] != other.shape:
+				raise ValueError("Number of Matrix columns must match the size of the Vector.")
+			result = [sum(a * b for a, b in zip(row, other.data)) for row in self._data]
+			return Vector(result)
+
+		elif isinstance(other, Matrix):
+			# Multiplication matrice par matrice
+			if self._shape[1] != other._shape[0]:
+				raise ValueError("Number of columns in Matrix 1 must match number of rows in Matrix 2.")
+			result = [[sum(a * b for a, b in zip(row, col)) for col in zip(*other._data)] for row in self._data]
+			return Matrix(result)
+
+		elif isinstance(other, (float, int)):
+			# Multiplication matrice par scalaire
+			result = [[other * self._data[i][j] for j in range(len(self._data[i]))] for i in range(len(self._data))]
+			return Matrix(result)
+
+		else:
+			raise ValueError("Unsupported multiplication with type {}.".format(type(other)))
+
+	
 	def trace(self):
 		if not isinstance(self, Matrix) or self.shape[0] != self.shape[1] or self.is_empty():
 			raise ValueError("It must be a square of a matrice ")
@@ -192,14 +213,12 @@ class Vector(Matrix):
 		if not elements :
 			raise ValueError("The list cannot be empty")
 		if isinstance(elements, list):
-			# print("here i am")
 			if not all(isinstance(row, list) for row in elements):
 				raise ValueError("Input must be a either a list of lists or a tuple for the shape2")
 			if len(elements) != 1 and any(len(item) != 1 for item in elements):
 				raise ValueError("Vector must have only one dimension")
 			if all(isinstance(elements, (int, float)) for item in elements):
 				raise ValueError("only numeric")
-			# print(len(elements), elements )
 			super().__init__(elements)
 		elif isinstance(elements, tuple):
 			if not all(isinstance(row, tuple) for row in elements):
@@ -208,27 +227,43 @@ class Vector(Matrix):
 				raise ValueError("Vector must have only one dimension")
 			if all(isinstance(elements, (int, float)) for item in elements):
 				raise ValueError("only numeric")
-			# print(len(elements), elements )
 			super().__init__(elements)
 		else:
 			raise ValueError("vector must be one list or tuple, with at list one value")
 
+	def mul_vec(self, other):
+		if isinstance(other, (int, float)):
+			# Multiplication par un scalaire
+			result = [[item * other for item in row] for row in self._data]
+			return Vector(result)
+		elif isinstance(other, Vector):
+			# Produit scalaire
+			return self.dot(other)
+		elif isinstance(other, Matrix):
+			# Multiplication vecteur-matrice
+			if self._shape[1] != other._shape[0]:
+				raise ValueError("Number of columns in vector must match the number of rows in the matrix.")
+			result = [sum(a * b for a, b in zip(self._data[0], col)) for col in zip(*other._data)]
+			return Vector([result])
+		else:
+			raise ValueError("Unsupported multiplication with type {}.".format(type(other)))
 
 
-		# a verifier, faire la difference entre vecteur ligne et vecteur colonne 
-		def dot(self, v):
-			# Step 1: Check if the input is a Vector
-			if not isinstance(v, Vector):
-				raise ValueError("The argument must be an instance of Vector.")
+	# a verifier, faire la difference entre vecteur ligne et vecteur colonne 
+	# def dot(self, v):
+	# 	# Step 1: Check if the input is a Vector
+	# 	if not isinstance(v, Vector):
+	# 		raise ValueError("The argument must be an instance of Vector.")
 
-			# Step 2: Check if shapes match
-			if self.shape[1] != v.shape[0]:
-				raise ValueError("Shapes do not match for dot product.")
+	# 	# Step 2: Check if shapes match
+	# 	if self.shape[1] != v.shape[0]:
+	# 		raise ValueError("Shapes do not match for dot product.")
 
-			# Step 3: Compute the dot product
-			result = sum(a * b for a, b in (zip(row, col) for col in self._data for row in v.data))
+	# 	# Step 3: Compute the dot product
+	# 	result = sum(a * b for a, b in (zip(row, col) for col in self._data for row in v.data))
 
-			return result
+	# 	return result
+
 
 
 

@@ -1,31 +1,45 @@
-from ex07.mathh import Matrix, Vector
+from mathh import Matrix, Vector
 
 # que se passe t il si vector est vide 
 def main():
-	try :
-		e1 = Vector([[0., 0., 0]])
-		e2 = Vector([[1., 2, 3]])
-		e3 = Vector([[-1, -2.]])
-		e4 = Vector([[1], [1]])
-		e5 = Vector([[-1], [6], [0]])
-		e6 = Vector([[3], [2], [1]])
+    # Test de base avec des vecteurs nuls
+    print("Basic tests with zero vectors:")
+    
+    u = Vector([[0., 0., 0.]])
+    print(u.norm_1(), u.norm(), u.norm_inf())  # Expected: 0.0, 0.0, 0.0
 
-
-		m1 = Matrix([[1., 2.], [3., 4.]])
-		m2 = Matrix([[5.,6.], [7., 8.]])
-
-		print("first test e1 :",e1.norm_1(),e1.norm_2(), e1.normal_inf())
-		print("second test e2 :",e2.norm_1(),e2.norm_2(), e2.normal_inf())
-		print("third test e3 :",e3.norm_1(),e3.norm_2(), e3.normal_inf())
-
-		print("first error test m1 :",m1.norm_1(),m1.norm_2(), m1.normal_inf())
-		print("second error test m2 :",m2.norm_1(),m2.norm_2(), m2.normal_inf())
-
-	
-	except ValueError as e :
-		print(e)		
-
-
+    # Test de base avec un vecteur simple
+    print("\nBasic tests with simple vectors:")
+    
+    u = Vector([[1., 2., 3.]])
+    print(u.norm_1(), u.norm(), u.norm_inf())  # Expected: 6.0, 3.74165738, 3.0
+    
+    u = Vector([[-1., -2.]])
+    print(u.norm_1(), u.norm(), u.norm_inf())  # Expected: 3.0, 2.236067977, 2.0
+    
+    # Cas limite : Vecteur avec des valeurs négatives
+    print("\nEdge cases with negative values:")
+    
+    u = Vector([[-3., -4., -5.]])
+    print(u.norm_1(), u.norm(), u.norm_inf())  # Expected: 12.0, 7.07106781187, 5.0
+    
+    u = Vector([[-1., -1., -1., -1.]])
+    print(u.norm_1(), u.norm(), u.norm_inf())  # Expected: 4.0, 2.0, 1.0
+    
+    # Cas limite : Vecteur avec des valeurs positives et négatives mélangées
+    print("\nEdge cases with mixed values:")
+    
+    u = Vector([[1., -1., 1., -1.]])
+    print(u.norm_1(), u.norm(), u.norm_inf())  # Expected: 4.0, 2.0, 1.0
+    
+    u = Vector([[3., -2., 1.]])
+    print(u.norm_1(), u.norm(), u.norm_inf())  # Expected: 6.0, 3.74165738677, 3.0
+    
+    # Cas limite : Vecteur avec des grands nombres
+    print("\nEdge cases with large numbers:")
+    
+    u = Vector([[1000., 2000., 3000.]])
+    print(u.norm_1(), u.norm(), u.norm_inf())  # Expected: 6000.0, 3741.65738677, 3000.0
 
 if __name__ == "__main__":
-	main()
+    main()
