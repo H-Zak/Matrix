@@ -116,10 +116,10 @@ class Matrix:
 	def mul_mat(self, other):
 		if isinstance(other, Vector):
 			# Multiplication matrice par vecteur
-			if self._shape[1] != other.shape:
+			if self._shape[1] != other.shape[0]:
 				raise ValueError("Number of Matrix columns must match the size of the Vector.")
-			result = [sum(a * b for a, b in zip(row, other.data)) for row in self._data]
-			return Vector(result)
+			result = [sum(a * b[0] for a, b in zip(row, other.data)) for row in self._data]
+			return Vector([[val] for val in result])
 
 		elif isinstance(other, Matrix):
 			# Multiplication matrice par matrice

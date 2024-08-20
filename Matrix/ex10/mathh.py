@@ -1,8 +1,6 @@
-# je ne gere pas le cas ou 2 vector multiplie entre eux renvoie un Vector et non pas une matrix
 import math
 class Matrix:
 	def __init__(self, input=None):
-		# print("here", type(input), input)
 		if isinstance(input,list) :
 			if not all(isinstance(row, list) for row in input):
 				raise ValueError("Input must be a either a list of lists or a tuple for the shape2")
@@ -23,7 +21,6 @@ class Matrix:
 			self._shape = (len(input), len(input[0]) if input else 0)
 		else:
 			raise ValueError("Input must be a either a list of lists or a tuple for the shape3")
-		# print(self._data)
 
 	@property
 	def data(self):
@@ -188,40 +185,55 @@ class Matrix:
 				transposed[j][i] = self.data[i][j]
 		return Matrix(transposed)
 	
-	def inverse(self):
-		if not isinstance(self, (Vector, Matrix)) or self.is_empty():
-			raise ValueError("it must be a vector or Matrix and not empty")
+	def row_echelon(self):
+		if not isinstance(self, (Vector, Matrix)) :
+			raise ValueError("it must be a vector or Matrix")
+		if self.is_empty():
+			return self
 		if self.shape[0] == 1 or self.shape[1] == 1:
 			return self
-
 		col = 0
+		self.swap_max_first_row()
 		for i in range(self.shape[0]):
-			print(self.data)
-			
-			self.swap_max_first_row(i, col)
-			if self.data[i][col] == 0:
-
+			while col < self.shape[1] and self.data[i][col] == 0:
 				col += 1
+			if col >= self.shape[1]:
+				continue
+			new_i = i
+			while (new_i < self.shape[0]):
+				divisor = self.data[new_i][col]
+				if divisor != 0:
+					self.data[new_i] = [x / divisor  for x in self.data[new_i]]
+				new_i += 1
 
-			self.data[i] = [x / self.data[i][col]  for x in self.data[i]]
 			for j in range (i + 1, self.shape[0]):
-				if (j <= self.shape[0]):
+				if (j < self.shape[0]):
 					factor = self.data[j][col]
-					self.data[j] = [current_row - factor * self.data[i][k] if k >= col else current_row for k, current_row in enumerate(self.data[j])]
-			col += 1
+					self.data[j] = [round(current_row - factor * self.data[i][k], 6) for k, current_row in enumerate(self.data[j])]
 
 		for i in range(self.shape[0] - 1,-1, -1):
-
 			for j in range(self.shape[1]):
-
 				if self.data[i][j] == 1:
-
 					for row in range(i - 1, -1 ,-1):
 						if self.data[row][j] != 0:
 							factor = self.data[row][j]
-							self.data[row] = [current_row - factor * self.data[i][k] for k,current_row in enumerate(self.data[row])]
+							self.data[row] = [round(current_row - factor * self.data[i][k], 6) for k,current_row in enumerate(self.data[row])]
+		return self
 
-
+	def swap_max_first_row(self):
+		start = 0
+		for j in range(self.shape[1]):
+			max_row_index = -1
+			row = -1
+			for i in range(start, self.shape[0]):
+				if self.data[i][j] == 0 and row == -1:
+					row = i
+				elif self.data[i][j]!= 0:
+					max_row_index = i
+					break
+			if max_row_index != row and max_row_index != -1 and row != -1:
+				self.data[row], self.data[max_row_index] = self.data[max_row_index], self.data[row]
+			start += 1
 	
 	def reduced(self):
 		for i in range(min(self.shape[0], self.shape[1]-1, -1, -1 )):
@@ -231,19 +243,7 @@ class Matrix:
 
 
 
-	def swap_max_first_row(self, row, col):
-		if row >= self.shape[0] or col >= self.shape[1]:
-				return  
-		max_val = abs(self.data[row][col])
-		max_row_index = row
-		for i in range(row, self.shape[0]):
 
-			if abs(self.data[i][col]) > max_val:
-				max_val = abs(self.data[i][col])
-				max_row_index = i
-		if max_row_index != row:
-			self.data[row], self.data[max_row_index] = self.data[max_row_index], self.data[row]
-	
 
 
 class Vector(Matrix):

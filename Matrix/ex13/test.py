@@ -3,28 +3,57 @@ import pdb
 import numpy as np
 
 def main():
-	try :
-		e1 = Vector([[4, 2]])
-		e2 = Vector([[4], [2]])
+    # Test 1: Rang d'une matrice identité 3x3
+    print("Test 1: Rank of a 3x3 Identity Matrix")
+    u = Matrix([
+        [1., 0., 0.],
+        [0., 1., 0.],
+        [0., 0., 1.]
+    ])
+    print("Matrix:\n", u)
+    print("Rank:", u.rank())  # Expected: 3
 
+    # Test 2: Rang d'une matrice 4x4 avec des colonnes dépendantes
+    print("\nTest 2: Rank of a 4x4 Matrix with Dependent Columns")
+    u = Matrix([
+        [1., 2., 0., 0.],
+        [2., 4., 0., 0.],
+        [-1., 2., 1., 1.],
+        [0., 0., 0., 0.]
+    ])
+    print("Matrix:\n", u)
+    print("Rank:", u.rank())  # Expected: 2
 
-		m1 = Matrix([[1., -1], [-1, 1]])
-		m4 = Matrix([[1, 2., 3.],[0., 1., 4.],[5., 6, 0]])
-		m3 = Matrix([[2., 0., 0. ],[0., 3, 0], [0., 0., 4.]])
-		m8= Matrix([[0.649425287, 0.097701149, -0.655172414],[-0.781609195, -0.126436782, 0.965517241], [0.143678161, 0.074712644, -0.206896552]])
+    # Test 3: Rang d'une matrice 4x3 générique
+    print("\nTest 3: Rank of a 4x3 Generic Matrix")
+    u = Matrix([
+        [8., 5., -2.],
+        [4., 7., 20.],
+        [7., 6., 1.],
+        [21., 18., 7.]
+    ])
+    print("Matrix:\n", u)
+    print("Rank:", u.rank())  # Expected: 3
 
-		m6 = Matrix([[1., 0., 0.],[0., 1., 0.],[0, 0., 1.]])
-		m7 = Matrix([[1., 2., 0., 0],[2., 4., 0., 0],[-1., 2., 1.,1]])
-		m5 = Matrix([[ 8., 5., -2.],[ 4., 7., 20.],[ 7., 6., 1.],[21., 18., 7.],])
-		print(m6.rank())
-		print(m7.rank())
-		print(m5.rank())
+    # Test 4: Cas limite - Rang d'une matrice nulle 3x3
+    print("\nTest 4: Edge Case - Rank of a 3x3 Zero Matrix")
+    u = Matrix([
+        [0., 0., 0.],
+        [0., 0., 0.],
+        [0., 0., 0.]
+    ])
+    print("Matrix:\n", u)
+    print("Rank:", u.rank())  # Expected: 0
 
-	
-	except ValueError as e :
-		print(e)		
-
-
+    # Test 5: Rang d'une matrice 2x3 avec une ligne de zéros
+    print("\nTest 5: Rank of a 2x3 Matrix with a Zero Row")
+    u = Matrix([
+        [1., 2., 3.],
+        [0., 0., 0.]
+    ])
+    print("Matrix:\n", u)
+    print("Rank:", u.rank())  # Expected: 1
 
 if __name__ == "__main__":
-	main()
+    main()
+
