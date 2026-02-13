@@ -1,9 +1,7 @@
 from mathh import Matrix, Vector
-import pdb
-import numpy as np
+
 
 def main():
-    # Test 1: Rang d'une matrice identité 3x3
     print("Test 1: Rank of a 3x3 Identity Matrix")
     u = Matrix([
         [1., 0., 0.],
@@ -13,7 +11,6 @@ def main():
     print("Matrix:\n", u)
     print("Rank:", u.rank())  # Expected: 3
 
-    # Test 2: Rang d'une matrice 4x4 avec des colonnes dépendantes
     print("\nTest 2: Rank of a 4x4 Matrix with Dependent Columns")
     u = Matrix([
         [1., 2., 0., 0.],
@@ -21,10 +18,10 @@ def main():
         [-1., 2., 1., 1.],
         [0., 0., 0., 0.]
     ])
+
     print("Matrix:\n", u)
     print("Rank:", u.rank())  # Expected: 2
 
-    # Test 3: Rang d'une matrice 4x3 générique
     print("\nTest 3: Rank of a 4x3 Generic Matrix")
     u = Matrix([
         [8., 5., -2.],
@@ -35,7 +32,6 @@ def main():
     print("Matrix:\n", u)
     print("Rank:", u.rank())  # Expected: 3
 
-    # Test 4: Cas limite - Rang d'une matrice nulle 3x3
     print("\nTest 4: Edge Case - Rank of a 3x3 Zero Matrix")
     u = Matrix([
         [0., 0., 0.],
@@ -45,7 +41,6 @@ def main():
     print("Matrix:\n", u)
     print("Rank:", u.rank())  # Expected: 0
 
-    # Test 5: Rang d'une matrice 2x3 avec une ligne de zéros
     print("\nTest 5: Rank of a 2x3 Matrix with a Zero Row")
     u = Matrix([
         [1., 2., 3.],

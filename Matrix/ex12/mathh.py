@@ -1,27 +1,37 @@
-import math
 class Matrix:
 	def __init__(self, input=None):
-
-		if isinstance(input,list) :
+		if isinstance(input, list):
+			if len(input) == 0:
+				self._data = []
+				self._shape = (0, 0)
+				return
 			if not all(isinstance(row, list) for row in input):
-				raise ValueError("Input must be a either a list of lists or a tuple for the shape2")
+				raise ValueError("Input must be a either a list of lists or a tuple ")
 			if not all(len(row) == len(input[0]) for row in input):
 				raise ValueError("All the row have not the same length")
+			if len(input) > 0 and len(input[0]) == 0:
+				raise ValueError("Matrix cannot have 0 columns")
 			if not all(all(isinstance(item, (int, float)) for item in sublist) for sublist in input ):
 				raise ValueError("must be numeric 2")
 			self._data = input
 			self._shape = (len(input), len(input[0]) if input else 0)
 		elif isinstance(input, tuple):
+			if len(input) == 0:
+				self._data = []
+				self._shape = (0, 0)
+				return
 			if not all(isinstance(row, tuple) for row in input):
-				raise ValueError("Input must be a either a list of lists or a tuple for the shape2")
+				raise ValueError("Input must be a either a list of lists or a tuple ")
 			if not all(len(row) == len(input[0]) for row in input):
 				raise ValueError("All the row have not the same length")
+			if len(input) > 0 and len(input[0]) == 0:
+				raise ValueError("Matrix cannot have 0 columns")
 			if not all(all(isinstance(item, (int, float)) for item in sublist) for sublist in input ):
 				raise ValueError("must be numeric 2")
-			self._data = input
+			self._data = [list(row) for row in input]
 			self._shape = (len(input), len(input[0]) if input else 0)
 		else:
-			raise ValueError("Input must be a either a list of lists or a tuple for the shape3")
+			raise ValueError("Input must be a either a list of lists or a tuple ")
 
 	@property
 	def data(self):
@@ -38,16 +48,10 @@ class Matrix:
 	def shape(self):
 		return self._shape
 
-	@shape.setter
-	def shape(self, value):
-		if not isinstance(value, tuple):
-			raise ValueError("Shape must be a tuple")
-
 
 	def _add_matrix(self, new):
 		data = self._check_list_or_matrix(new)
 		create = [[self._data[i][j] + data[i][j]  for j in range(len(self._data[0]))] for i in range(len(self._data))]
-		print("\nadd :",create)
 		return Matrix(create)
 
 	def __radd__(self, new):
@@ -59,13 +63,11 @@ class Matrix:
 	def __sub__(self, new):
 		data = self._check_list_or_matrix(new)
 		create = [[self._data[i][j] - data[i][j]  for j in range(len(self._data[0]))] for i in range(len(self._data))]
-		print("\nsub : ", create)
 		return Matrix(create)
 
 	def __rsub__(self, new):
 		data = self._check_list_or_matrix(new)
 		create = [[data[i][j] - self._data[i][j]   for j in range(len(self._data[0]))] for i in range(len(self._data))]
-		print("sub : ", create)
 		return Matrix(create)
 
 
@@ -73,23 +75,30 @@ class Matrix:
 		if isinstance(new, Matrix):
 			if self._shape != new._shape:
 				raise ValueError("Must have the same shape")
-			data = new.data
-			return data
-		elif isinstance(new, list) and all(isinstance(raw, list) for raw in new):
+			return new.data
+
+		elif isinstance(new, list) and all(isinstance(row, list) for row in new):
 			data = new
-			shape = (len(new), len(new[0]) if new[0] else 0)
+
+			rows = len(data)
+			cols = len(data[0]) if rows > 0 else 0
+			shape = (rows, cols)
+
+			if rows > 0 and any(len(row) != cols for row in data):
+				raise ValueError("All rows must have the same length")
+
 			if shape != self._shape:
 				raise ValueError("Must have the same shape")
+
 			return data
+
 		else:
 			raise ValueError("You must send a Matrix or a list of lists")
 
 	def __truediv__(self, other):
-		print(type(other))
 		if not isinstance(other, (int, float)):
 			raise ValueError("Need an int or float")
 		create = [[self._data[i][j] / other for j in range(len(self._data[i]))] for i in range(len(self._data))]
-		print("div :", create, "\n")
 		return Matrix(create)
 
 
@@ -98,7 +107,6 @@ class Matrix:
 		if not isinstance(other, (int, float)):
 			raise ValueError("Need an int or float")
 		create = [[other / self._data[i][j] for j in range(len(self._data[i]))] for i in range(len(self._data))]
-		print("div :", create, "\n")
 		return Matrix(create)
 
 	def __mul__(self, other):
@@ -106,31 +114,35 @@ class Matrix:
 			if self._shape[1] != other.shape[0]:
 				raise ValueError("number of Matrix1 line should be equal to columm of matrix 2 ()")
 			create = [[sum(a * b for a, b in zip(row, col)) for col in zip(*other._data)] for row in self._data]
-		elif isinstance(other, (float, int, Matrix, Vector)):
+		elif isinstance(other, (float, int)):
 			create = [[other * self._data[i][j] for j in range(len(self._data[i]))] for i in range(len(self._data))]
 		else:
 			raise ValueError("Must be multiple by a int or a float or a Matrix or a Vector")
-		print("mul : ", create)
 		return Matrix(create)
-	
+
 	def trace(self):
-		if not isinstance(self, Matrix) or self.shape[0] != self.shape[1] or self.is_empty():
-			raise ValueError("It must be a square of a matrice ")
+		if self.shape == (0, 0):
+			return 0.0
+		if self.shape[0] != self.shape[1]:
+			raise ValueError("It must be a square matrix")
 		return sum(self.data[i][i] for i in range(self.shape[0]))
-		
+
 	def __rmul__(self, other):
 		if isinstance(other, (Matrix, Vector)):
 			if other.shape[1] != self._shape[0] :
 				raise ValueError("number of Matrix1 line should be equal to columm of matrix 2")
 			create = [[sum(a * b for a, b in zip(row, col)) for col in zip(*self._data)] for row in other._data]
-		elif isinstance(other, (float, int, Matrix, Vector)):
+		elif isinstance(other, (float, int)):
 			create = [[other * self._data[i][j] for j in range(len(self._data[i]))] for i in range(len(self._data))]
 		else:
 			raise ValueError("Must be multiple by a int or a float or a Matrix or a Vector")
-		print("mul : ", create)
 		return Matrix(create)
 
 	def T(self):
+		rows, cols = self._shape
+		self._shape = (cols, rows)
+		if rows == 0 or cols == 0:
+			return
 		self._data = [list(row) for row in zip(*self._data)]
 
 	def __str__(self):
@@ -142,204 +154,195 @@ class Matrix:
 
 	def __repr__(self):
 		return f"Matrix({self._data})"
-	
-	def dot(self, v):
-		if type(self) != Vector or type(v) != Vector :
-			raise ValueError("Must be vector")
-		if self.shape != v.shape:
-			raise ValueError("Not the same shape")
-		size = self.shape
-		result = 0
-		for i in range(size[0]):
-			for j in range(size[1]):
-					result += self.data[i][j] * v.data[i][j]
-		return result
-	
-	def norm_1(self):
-		if(isinstance(self, Vector)):
-			return sum(abs(x) for sublist in self.data for x in sublist)
-		else:
-			raise ValueError("Must be a vector")
 
-	def norm_2(self):
-		if isinstance(self, Vector):
-			return math.sqrt(sum(pow(x , 2) for sublist in self.data for x in sublist))
-		else:
-			raise ValueError("Must be a Vector")
 
-	
-	def normal_inf(self):
-		if (isinstance(self, Vector)):
-			return max(abs(x) for sublist in self.data for x in sublist)
-		else:
-			raise ValueError("Must be a vector")
-	
+
+
+
+
 	def is_empty(self):
-		return all(len(sublist) == 0 for sublist in self.data)
+		return self.shape == (0, 0)
 
 	def transpose(self):
-		m ,n = self.shape
-		transposed = [[0 for _ in  range(m) ] for _ in range(n) ]
+		m, n = self.shape
+
+		if self.shape == (0, 0):
+			return Matrix([])
+
+		transposed = [[0 for _ in range(m)] for _ in range(n)]
 		for i in range(m):
 			for j in range(n):
 				transposed[j][i] = self.data[i][j]
 		return Matrix(transposed)
-	
+
 	def row_echelon(self):
-		if not isinstance(self, (Vector, Matrix)) :
-			raise ValueError("it must be a vector or Matrix")
-		if self.is_empty():
-			return self
-		if self.shape[0] == 1 or self.shape[1] == 1:
-			return self
-		col = 0
-		self.swap_max_first_row()
-		for i in range(self.shape[0]):
-			while col < self.shape[1] and self.data[i][col] == 0:
-				col += 1
-			if col >= self.shape[1]:
+		result = Matrix([row[:] for row in self.data])
+
+		if result.shape == (0, 0):
+			return result
+
+		m, n = result.shape
+		eps = 1e-10
+		pivot_row = 0
+
+		def abs_(x):
+			return x if x >= 0 else -x
+
+		for j in range(n):
+			if pivot_row >= m:
+				break
+
+			# pivot partiel
+			max_row = pivot_row
+			max_val = abs_(result.data[pivot_row][j])
+			for i in range(pivot_row + 1, m):
+				v = abs_(result.data[i][j])
+				if v > max_val:
+					max_val = v
+					max_row = i
+
+			if max_val < eps:
 				continue
-			new_i = i
-			while (new_i < self.shape[0]):
-				divisor = self.data[new_i][col]
-				if divisor != 0:
-					self.data[new_i] = [x / divisor  for x in self.data[new_i]]
-				new_i += 1
 
-			for j in range (i + 1, self.shape[0]):
-				if (j < self.shape[0]):
-					factor = self.data[j][col]
-					self.data[j] = [round(current_row - factor * self.data[i][k], 6) for k, current_row in enumerate(self.data[j])]
+			# swap
+			if max_row != pivot_row:
+				result.data[pivot_row], result.data[max_row] = result.data[max_row], result.data[pivot_row]
 
-		for i in range(self.shape[0] - 1,-1, -1):
-			for j in range(self.shape[1]):
-				if self.data[i][j] == 1:
-					for row in range(i - 1, -1 ,-1):
-						if self.data[row][j] != 0:
-							factor = self.data[row][j]
-							self.data[row] = [round(current_row - factor * self.data[i][k], 6) for k,current_row in enumerate(self.data[row])]
-		return self
+			# normaliser pivot
+			divisor = result.data[pivot_row][j]
+			result.data[pivot_row] = [x / divisor for x in result.data[pivot_row]]
 
-	def swap_max_first_row(self):
-		start = 0
-		for j in range(self.shape[1]):
-			max_row_index = -1
-			row = -1
-			for i in range(start, self.shape[0]):
-				if self.data[i][j] == 0 and row == -1:
-					row = i
-				elif self.data[i][j]!= 0:
-					max_row_index = i
-					break
-			if max_row_index != row and max_row_index != -1 and row != -1:
-				self.data[row], self.data[max_row_index] = self.data[max_row_index], self.data[row]
-			start += 1
-	def swap_max_first_inverse(self, identity):
-		start = 0
-		for j in range(self.shape[1]):
-			max_row_index = -1
-			row = -1
-			for i in range(start, self.shape[0]):
-				if self.data[i][j] == 0 and row == -1:
-					row = i
-				elif self.data[i][j]!= 0:
-					max_row_index = i
-					break
-			if max_row_index != row and max_row_index != -1 and row != -1:
-				self.data[row], self.data[max_row_index] = self.data[max_row_index], self.data[row]
-				identity.data[row], identity.data[max_row_index] = identity.data[max_row_index], identity.data[row]
-			start += 1
+			# éliminer toutes les autres lignes
+			for i in range(m):
+				if i == pivot_row:
+					continue
+				factor = result.data[i][j]
+				if abs_(factor) < eps:
+					continue
+				result.data[i] = [curr - factor * result.data[pivot_row][k]
+								for k, curr in enumerate(result.data[i])]
+
+			pivot_row += 1
+
+		# clean
+		for i in range(m):
+			for j in range(n):
+				if abs_(result.data[i][j]) < eps:
+					result.data[i][j] = 0.0
+
+		return result
+
+
+	def mul_vec(self, vec):
+		if not isinstance(vec, Vector):
+			raise ValueError("Argument must be a Vector")
+		vec_size = max(vec.shape)
+		if self._shape[1] != vec_size:
+			raise ValueError("Number of Matrix columns must match the size of the Vector.")
+
+		if vec.shape[0] == 1:
+			vec_elements = vec.data[0]
+		else:
+			vec_elements = [row[0] for row in vec.data]
+
+		result = [sum(a * b for a, b in zip(row, vec_elements)) for row in self._data]
+		return Vector([[val] for val in result])
+
+	def mul_mat(self, mat):
+		if not isinstance(mat, Matrix):
+			raise ValueError("Argument must be a Matrix")
+
+		if self._shape[1] != mat._shape[0]:
+			raise ValueError("Number of columns in Matrix 1 must match number of rows in Matrix 2.")
+		result = [[sum(a * b for a, b in zip(row, col)) for col in zip(*mat._data)] for row in self._data]
+		return Matrix(result)
+
+	def add(self, other):
+		result = self._add_matrix(other)
+		self.data = result.data
+
+	def sub(self, other):
+		data = self._check_list_or_matrix(other)
+		self.data = [[self._data[i][j] - data[i][j] for j in range(len(self._data[0]))] for i in range(len(self._data))]
+
+	def scl(self, scalar):
+		self.data = [[scalar * self._data[i][j] for j in range(len(self._data[i]))] for i in range(len(self._data))]
 
 
 	def identity_matrix(self):
-			if not isinstance(self, Matrix) or self.is_empty():
-				raise ValueError("it must be a Matrix and not empty")
-			
+			if self.is_empty():
+				return Matrix([])
+
 			rows, cols = self.shape
 			if rows != cols:
 				raise ValueError("Identity matrix can only be created for square matrices")
-			
-			identity = [[1 if i == j else 0 for j in range(cols)] for i in range(rows)]
-			return identity
-	
-	def round_floatt(value, decimals=6):
-		return round(value, decimals)
-	
+
+			identity = [[1.0 if i == j else 0.0 for j in range(cols)] for i in range(rows)]
+			return Matrix(identity)
+
 	def inverse(self):
+		rows, cols = self.shape
+		if rows == 0:
+			return Matrix([])
+		if rows != cols:
+			raise ValueError("Matrix must be square")
 
-		if not isinstance(self, (Vector, Matrix)) or self.is_empty():
-			raise ValueError("it must be a vector or Matrix and not empty")
-		if self.shape[0] == 1 or self.shape[1] == 1:
-			return self
-		identity = self.identity_matrix()
-		if self.shape[0] == self.shape[1] and self.shape[0] < 5 and self.determinant() == 0:
-			raise ValueError("Singular Matrix")
-		col = 0
-		self.swap_max_first_inverse(identity)
-		for i in range(self.shape[0]):
+		n = rows
+		eps = 1e-10
 
-			while col < self.shape[1] and self.data[i][col] == 0:
-				col += 1
-			if col >= self.shape[1]:
-				continue
-			new_i = i
-			while (new_i < self.shape[0]):
-				divisor = self.data[new_i][col]
-				if divisor != 0:
-					self.data[new_i] = [x / divisor  for x in self.data[new_i]]
-					identity[new_i] = [x / divisor  for x in identity[new_i]]
-				new_i += 1
+		A = [row[:] for row in self.data]
+		I = self.identity_matrix().data
 
-			for j in range (i + 1, self.shape[0]):
-				if (j < self.shape[0]):
-					factor = self.data[j][col]
-					self.data[j] = [round(current_row - factor * self.data[i][k], 6) for k, current_row in enumerate(self.data[j])]
-					identity[j] = [round(current_row - factor * identity[i][k], 6)   for k, current_row in enumerate(identity[j])]
+		for col in range(n):
+			#  trouver le pivot
+			pivot = max(range(col, n), key=lambda r: abs(A[r][col]))
+			if abs(A[pivot][col]) <= eps:
+				raise ValueError("Singular Matrix")
 
-		for i in range(self.shape[0] - 1,-1, -1):
-			for j in range(self.shape[1]):
-				if self.data[i][j] == 1:
-					for row in range(i - 1, -1 ,-1):
-						if self.data[row][j] != 0:
-							factor = self.data[row][j]
-							factor2 = identity[row][j] 
-							self.data[row] = [round(current_row - factor * self.data[i][k], 6) for k,current_row in enumerate(self.data[row])]
-							identity[row] = [round(current_row - factor * identity[i][k], 6)for k,current_row in enumerate(identity[row])]
-		return identity
+			# swap
+			if pivot != col:
+				A[col], A[pivot] = A[pivot], A[col]
+				I[col], I[pivot] = I[pivot], I[col]
+
+			#  normaliser la ligne pivot
+			pv = A[col][col]
+			A[col] = [x / pv for x in A[col]]
+			I[col] = [x / pv for x in I[col]]
+
+			# éliminer toutes les autres lignes
+			for r in range(n):
+				if r == col:
+					continue
+				factor = A[r][col]
+				if abs(factor) <= eps:
+					continue
+				A[r] = [a - factor * b for a, b in zip(A[r], A[col])]
+				I[r] = [a - factor * b for a, b in zip(I[r], I[col])]
+
+		# clean
+		def _clean(x):
+			if abs(x) < 1e-10:
+				return 0.0
+			return round(x, 9)
+
+		I = [[_clean(x) for x in row] for row in I]
+		return Matrix(I)
 
 
 
-	
-	def reduced(self):
-		for i in range(min(self.shape[0], self.shape[1]-1, -1, -1 )):
-			pivot= self.data[i][i]
-			
 
-	def swap_max_first_row(self):
-		start = 0
-		for j in range(self.shape[1]):
-			max_row_index = -1
-			row = -1
-			for i in range(start, self.shape[0]):
-				if self.data[i][j] == 0 and row == -1:
-					row = i
-				elif self.data[i][j]!= 0:
-					max_row_index = i
-					break
-			if max_row_index != row and max_row_index != -1 and row != -1:
-				self.data[row], self.data[max_row_index] = self.data[max_row_index], self.data[row]
-			start += 1
-	
+
+
 	def determinant_3(self):
 		a, b, c = self.data[0]
 		d, e, f = self.data[1]
 		g, h, i = self.data[2]
 		return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g)
-	
+
 	def minor(self, i, j):
 		"""Return the minor matrix after removing row i and column j"""
 		return [row[:j] + row[j+1:] for row in (self.data[:i] + self.data[i+1:])]
-	
+
 	def determinant_4(self):
 		det = 0
 		for col in range(4):
@@ -347,12 +350,16 @@ class Matrix:
 			cofactor = ((-1) ** col) * self.data[0][col] * minor_matrix.determinant_3()
 			det += cofactor
 		return det
-	
+
 	def determinant(self):
-		if not isinstance(self, (Vector, Matrix)) or self.is_empty():
-			raise ValueError("it must be a vector or Matrix and not empty")
-		if self.shape[0] != self.shape[1] or self.shape[0] > 4:
-			raise ValueError("matrice must be a square, maximum dimension of 4 ")
+		if self.shape == (0, 0):
+			raise ValueError("Matrix must not be empty")
+		if self.shape[0] != self.shape[1]:
+			raise ValueError("Matrix must be square")
+		if self.shape[0] > 4:
+			raise ValueError("Matrix dimension must not exceed 4")
+		if self.shape[0] == 1:
+			return self.data[0][0]
 		if self.shape[0] == 2:
 			return self.data[0][0] * self.data[1][1] - self.data[0][1] * self.data[1][0]
 		elif self.shape[0] == 3 :
@@ -360,11 +367,8 @@ class Matrix:
 		else :
 			return self.determinant_4()
 
-		
 
 
-
-	
 
 
 class Vector(Matrix):
@@ -373,34 +377,54 @@ class Vector(Matrix):
 			raise ValueError("The list cannot be empty")
 		if isinstance(elements, list):
 			if not all(isinstance(row, list) for row in elements):
-				raise ValueError("Input must be a either a list of lists or a tuple for the shape2")
-			if len(elements) != 1 and any(len(item) != 1 for item in elements):
-				raise ValueError("Vector must have only one dimension")
-			if all(isinstance(elements, (int, float)) for item in elements):
-				raise ValueError("only numeric")
+				raise ValueError("Input must be a list of lists")
+			if len(elements) == 1 and len(elements[0]) >= 1:
+				pass
+			elif len(elements) >= 1 and all(len(row) == 1 for row in elements):
+				pass
+			else:
+				raise ValueError("Vector must be a row vector (1×n) or column vector (n×1)")
 			super().__init__(elements)
 		elif isinstance(elements, tuple):
 			if not all(isinstance(row, tuple) for row in elements):
-				raise ValueError("Input must be a either a list of lists or a tuple for the shape21")
-			if len(elements) != 1 and any(len(item) != 1 for item in elements):
-				raise ValueError("Vector must have only one dimension")
-			if all(isinstance(elements, (int, float)) for item in elements):
-				raise ValueError("only numeric")
+				raise ValueError("Input must be a tuple of tuples")
+			if len(elements) == 1 and len(elements[0]) >= 1:
+				pass
+			elif len(elements) >= 1 and all(len(row) == 1 for row in elements):
+				pass
+			else:
+				raise ValueError("Vector must be a row vector (1×n) or column vector (n×1)")
 			super().__init__(elements)
 		else:
 			raise ValueError("vector must be one list or tuple, with at list one value")
 
+	def dot(self, v):
+		if not isinstance(v, Vector):
+			raise ValueError("The argument must be an instance of Vector.")
+
+		#  Flat les vecteurs
+		self_flat = [item for row in self._data for item in row]
+		v_flat = [item for row in v._data for item in row]
+
+		# verif dimension
+		if len(self_flat) != len(v_flat):
+			raise ValueError("Vectors must have the same dimension for dot product.")
+
+		# dot
+		result = sum(a * b for a, b in zip(self_flat, v_flat))
+
+		return result
 
 
-		def dot(self, v):
-			if not isinstance(v, Vector):
-				raise ValueError("The argument must be an instance of Vector.")
+	def norm_1(self):
+		return sum(x if x >= 0 else -x for sublist in self.data for x in sublist)
 
-			if self.shape[1] != v.shape[0]:
-				raise ValueError("Shapes do not match for dot product.")
-			result = sum(a * b for a, b in (zip(row, col) for col in self._data for row in v.data))
+	def norm(self):
+		return pow(sum(pow(x , 2) for sublist in self.data for x in sublist), 0.5)
 
-			return result
+	def norm_inf(self):
+		return max(x if x >= 0 else -x for sublist in self.data for x in sublist)
+
 
 
 

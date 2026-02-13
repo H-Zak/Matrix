@@ -1,79 +1,63 @@
-from mathh import Matrix, Vector
-
-def linear_combination(u, coefs):
-    if u:
-        shaping = u[0].shape
-        if any(shaping != vecteur.shape for vecteur in u ):
-            raise ValueError("All vector must have the same shape")
-        len_vecteur = shaping[1] if shaping[0] == 1 else shaping[0]
-        if (len(u) != len(coefs) ):
-            raise ValueError("we must have the same number of coefficients as vectors")
-        result = Vector([[0.0 for _ in range(shaping[1])] for _ in range(shaping[0])])
-
-        len_1 = 0
-        for i in range(shaping[0]):
-            for j in range(shaping[1]):
-                for z in range(len(u)):
-                    result.data[i][j] += u[z].data[i][j] * coefs[z]
-                len_1 += 1
-        return result	
-    else:
-        raise ValueError("There is no vector")
-        
+from mathh import Matrix, Vector, linear_combination
 
 
 def main():
-    # Basic tests
+    print("=== Tests de la combinaison linéaire ===")
+
     e1 = Vector([[1., 0., 0.]])
     e2 = Vector([[0., 1., 0.]])
     e3 = Vector([[0., 0., 1.]])
-    
-    print("Basic Test 1:")
+
+    print("Test de base 1 : Vecteurs de base")
+    print("Vecteurs :", e1, e2, e3)
+    print("Coefficients : [10., -2., 0.5]")
     result = linear_combination([e1, e2, e3], [10., -2., 0.5])
-    print("Expected: [10.0, -2.0, 0.5]")
-    print("Result  :", result)
+    print("Résultat attendu : [10.0, -2.0, 0.5]")
+    print("Résultat obtenu :", result)
     print()
 
     v1 = Vector([[1., 2., 3.]])
     v2 = Vector([[0., 10., -100.]])
-    
-    print("Basic Test 2:")
+
+    print("Test de base 2 : Vecteurs génériques")
+    print("Vecteurs :", v1, v2)
+    print("Coefficients : [10., -2.]")
     result = linear_combination([v1, v2], [10., -2.])
-    print("Expected: [10.0, 0.0, 230.0]")
-    print("Result  :", result)
+    print("Résultat attendu : [10.0, 0.0, 230.0]")
+    print("Résultat obtenu :", result)
     print()
-    
-    # Edge cases
-    print("Edge Case 1: Empty lists")
+
+    print("=== Tests des cas limites ===")
+
+    print("Cas limite 1 : Listes vides")
     try:
         result = linear_combination([], [])
-        print("Expected: []")
-        print("Result  :", result)
+        print("Résultat :", result)
     except ValueError as e:
-        print("Caught an error:", e)
+        print("Erreur capturée :", e)
     print()
 
-    print("Edge Case 2: Mismatched lengths")
+    print("Cas limite 2 : Nombre de coefficients différent")
     try:
         result = linear_combination([v1, v2], [10.])
-        print("Test failed: Mismatched lengths were accepted.")
+        print("Échec : Longueurs différentes acceptées.")
     except ValueError as e:
-        print("Caught an error for mismatched lengths:", e)
+        print("Succès : Erreur capturée pour longueurs différentes :", e)
     print()
 
-    print("Edge Case 3: Vectors of different sizes")
+    print("Cas limite 3 : Vecteurs de tailles différentes")
     try:
         v3 = Vector([[1., 2.]])
         result = linear_combination([v1, v3], [10., -2.])
-        print("Test failed: Vectors of different sizes were accepted.")
+        print("Échec : Tailles différentes acceptées.")
     except ValueError as e:
-        print("Caught an error for vectors of different sizes:", e)
+        print("Succès : Erreur capturée pour tailles différentes :", e)
     print()
 
-    print("Edge Case 4: Zero coefficients")
+    print("Cas limite 4 : Coefficients nuls")
     result = linear_combination([v1, v2], [0., 0.])
-    print("Expected: [0.0, 0.0, 0.0]")
-    print("Result  :", result)
+    print("Résultat attendu : [0.0, 0.0, 0.0]")
+    print("Résultat obtenu :", result)
     print()
 
 if __name__ == "__main__":
